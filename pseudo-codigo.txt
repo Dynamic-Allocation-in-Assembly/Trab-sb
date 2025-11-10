@@ -1,0 +1,34 @@
+int brk; //brk atual mantido
+int base_brk; //endereço inicial da heap:
+int ponteiro = 0;
+
+void setup_brk() {
+	base_brk = sys_brk(0); //sys_brk(0) = endereço atual de brk;
+	brk = base_brk;
+}
+
+void dismiss_brk() {
+	sys_brk(base_brk);
+	brk = base_brk;
+}
+
+return expand_brk(int y) {
+	int antigo = brk;
+	int proximo = 9 + y + brk; //uso(1BYTE)+tamanho(8BYTES) = 9;
+
+}
+
+void *memory_alloc(unsigned lon int y) {
+	//Se eu passo do brk = não achei espaço antes dele.
+	//Então vou subir o BRK e alocar o mais pra cima possível.
+	if (ponteiro >= brk) {
+		setup_brk(y);
+		return brk;
+	}
+
+	if ([ponteiro] == 0 && [ponteiro+1] >= y) {
+		[ponteiro] = 1;
+		return ponteiro;
+	}
+	ponteiro += 1+[ponteiro+1];
+}
