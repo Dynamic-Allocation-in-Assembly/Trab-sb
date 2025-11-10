@@ -1,6 +1,5 @@
 int brk; //brk atual mantido
 int base_brk; //endereço inicial da heap:
-int ponteiro = 0;
 
 void setup_brk() {
 	base_brk = sys_brk(0); //sys_brk(0) = endereço atual de brk;
@@ -19,16 +18,62 @@ return expand_brk(int y) {
 }
 
 void *memory_alloc(unsigned lon int y) {
-	//Se eu passo do brk = não achei espaço antes dele.
-	//Então vou subir o BRK e alocar o mais pra cima possível.
-	if (ponteiro >= brk) {
-		setup_brk(y);
-		return brk;
+	melhor = NULL;
+	melhor_tam = 0;
+
+	p = heap_start;
+	while (p < brk) {
+		uso = [p]
+		tam = (*ulong)*(p+1);
+
+		if (uso == 0 && tam >= y) {
+			if (tam > melhor_tam) {
+				melhor = p;
+				melhor_tam = tam;
+			}
+		}
+		p += 9 + tam;
 	}
 
-	if ([ponteiro] == 0 && [ponteiro+1] >= y) {
-		[ponteiro] = 1;
-		return ponteiro;
+	//SE ACHOU UM BLOCO NO MEIO POSSÍVEL PARA SE COLOCAR:
+	if (melhor != NULL) {
+		if (melhor_tam >= y + 9 + 1) {
+			[melhor] = 1;
+			*(ulong*)(melhor+1) = y;
+
+			novo_bloco = melhor+9+y;
+			[novo] = 0;
+			*(ulong*)(novo+1) = melhor_tam - 9 - y;
+		}
+		else {
+			[melhor] = 1;
+		}
+
+		return melhor+9;
 	}
-	ponteiro += 1+[ponteiro+1];
+
+	//NAO ACHOU BLOCO NO MEIO:
+	expand_brk(y);
+	p = antigo;
+	[p] = 1;
+	*(ulong*)(p+1) = y;
+
+	return p+9;
 }
+
+int memory_free(void *pointer) {
+	unsigned char *p = (unsigned char *)pointer - 9;
+
+	*p = 0;
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+
