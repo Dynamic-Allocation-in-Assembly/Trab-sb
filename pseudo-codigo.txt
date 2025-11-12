@@ -11,17 +11,11 @@ void dismiss_brk() {
 	brk = base_brk;
 }
 
-return expand_brk(int y) {
-	int antigo = brk;
-	int proximo = 9 + y + brk; //uso(1BYTE)+tamanho(8BYTES) = 9;
-
-}
-
 void *memory_alloc(unsigned lon int y) {
 	melhor = NULL;
 	melhor_tam = 0;
 
-	p = heap_start;
+	p = base_brk;
 	while (p < brk) {
 		uso = [p]
 		tam = (*ulong)*(p+1);
@@ -47,18 +41,18 @@ void *memory_alloc(unsigned lon int y) {
 		}
 		else {
 			[melhor] = 1;
+			*(ulong*)(melhor+1) = y;
 		}
 
 		return melhor+9;
 	}
 
 	//NAO ACHOU BLOCO NO MEIO:
-	expand_brk(y);
-	p = antigo;
-	[p] = 1;
-	*(ulong*)(p+1) = y;
+	brk += [brk-8] + 9;
+	[brk-9] = 1;
+	[brk-8] = y;
 
-	return p+9;
+	return brk;
 }
 
 int memory_free(void *pointer) {
