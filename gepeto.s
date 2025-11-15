@@ -167,12 +167,8 @@ memory_alloc:
     ; Fazendo as contas para colocar o BRK no começo do próximo bloco:
     add rcx, 9
     add rax, rcx
-
-    mov rdi, rax        ; argumento da syscall = novo_brk
-    mov rax, SYS_brk
-    syscall
-
-	mov [brk], rax
+    ; Subindo BRK:
+    mov [brk], rax
 
     ; Colocando o byte de uso no metadado do novo bloco:
     mov byte [rax - 9], 1
