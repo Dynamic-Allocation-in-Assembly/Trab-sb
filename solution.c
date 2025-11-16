@@ -33,6 +33,11 @@ int main() {
     void *c = memory_alloc(15);
     print_block("Bloco C (reuso de A sem split):", c);
 
+unsigned long *tamanho_ptr = (unsigned long *)(c - 8);
+// 2. Imprime o VALOR do tamanho (desreferenciando o ponteiro).
+printf("Tamanho do Bloco C (Dados): %lu bytes\n", *tamanho_ptr);
+
+
     // 3) Free em bloco e alocação COM split
     printf("\n[CASO 3] Free seguido de alocação COM split:\n");
 

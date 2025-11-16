@@ -144,7 +144,7 @@ memory_alloc:
     ; Colocando 1 no ponteiro do começo dos metadados do bloco livre (Melhor):
     mov byte [r13], 1
     ; Colocando y (tamanho do bloco que queremos reservar) nos metadados do tamanho do bloco disponível:
-    mov [r13 + 1], r12
+    ; mov [r13 + 1], r12
     ; Colocando o valor do começo dos dados no retorno (RAX):
     lea rax, [r13 + 9]
     jmp .done
