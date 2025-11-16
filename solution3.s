@@ -75,38 +75,37 @@ memory_alloc:
     ; Pegando o tamanho do bloco (8 bytes do uso) e guardando em RCX:
     mov rcx, [rsi + 1]
 
-    ; Se bloco não estiver sendo usado, pula para Advance!
+    ; Se bloco não estiver sendo usado, pula para proximo!
     cmp al, 0
-    jne .advance
+    jne .proximo
 
     ; Comparando o tamanho que a gente quer colocar com o disponível no bloco:
     cmp rcx, r12
     ; Se tamanho insuficiente: pula para o próximo!
-    jb .advance
+    jb .proximo
 
     ; Vendo se achamos um tamanho melhor do que melhor_tam. WORST-FIT:
     cmp rcx, r14
     ; Se tamanho disponível encontrado é menor do que melhor_tam, vamos para o próximo bloco:
-    jle .advance
+    jle .proximo
 
     ; Se chegamos até aqui, então vamos mudar as variáveis melhor e melhor_tam:
     mov r13, rsi
     mov r14, rcx
 
-.advance:
+.proximo:
     ; Pegando o tamanho e colocando em rcx:
     mov rcx, [rsi + 1]
     add rsi, 9
     add rsi, rcx
     jmp .loop
 
-
 .confere_achou:
     cmp r14, 0
-    jne .middle_block
-    jmp .no_middle_block
+    jne .bloco_no_meio
+    jmp .nao_bloco_no_meio
 
-.middle_block:
+.bloco_no_meio:
     ; Colocando o melhor_tam em RCX:
     mov rcx, r14
     ; Colocando em RBX o nosso y:
@@ -117,9 +116,9 @@ memory_alloc:
 
     ; Comparando se o tamanho do bloco é menor do que y+10:
     cmp rcx, rbx
-    jb .use_whole
+    jb .usa_todo_bloco
 
-.split_block:
+.novo_bloco:
     ; Colocando 1 no ponteiro do começo dos metadados do bloco livre (Melhor):
     mov byte [r13], 1
     ; Colocando y (tamanho do bloco que queremos reservar) nos metadados do tamanho do bloco disponível:
@@ -138,33 +137,53 @@ memory_alloc:
 
     ; Colocando o valor do começo dos dados no retorno (RAX):
     lea rax, [r13 + 9]
-    jmp .done
+    jmp .finalizado
 
-.use_whole:
+.usa_todo_bloco:
     ; Colocando 1 no ponteiro do começo dos metadados do bloco livre (Melhor):
     mov byte [r13], 1
     ; Colocando y (tamanho do bloco que queremos reservar) nos metadados do tamanho do bloco disponível:
     ; mov [r13 + 1], r12
     ; Colocando o valor do começo dos dados no retorno (RAX):
     lea rax, [r13 + 9]
-    jmp .done
+    jmp .finalizado
 
-.no_middle_block:
-    ; Guarda em RAX o ponteiro brk:
-    mov rax, [brk]
-    ; Se brk == base_brk (heap nova), NÃO ler [rax - 8] — inicializar rcx = 0
-    mov rbx, [base_brk]
-    cmp rax, rbx
-    je ._no_prev_block
+;.nao_bloco_no_meio:
+;    ; Guarda em RAX o ponteiro brk:
+;    mov rax, [brk]
+;    ; Se brk == base_brk (heap nova), NÃO ler [rax - 8] — inicializar rcx = 0
+;    mov rbx, [base_brk]
+;    cmp rax, rbx
+;    je .heap_vazia
+;
+;    ; caso normal: há um bloco anterior, ler o tamanho dele:
+;    mov rcx, [rax - 8]
+;    jmp .heap_nao_vazia
+.nao_bloco_no_meio: 
 
-    ; caso normal: há um bloco anterior, ler o tamanho dele:
-    mov rcx, [rax - 8]
-    jmp ._have_prev_block
+    mov rbx, [brk]             ; rbx = old_brk
 
-._no_prev_block:
+    ; calcular new_brk = old_brk + 9 + y e chamar sys_brk(new_brk)
+    lea rdi, [rbx + 9 + r12]   ; rdi = novo valor para brk
+    mov rax, SYS_brk
+    syscall
+
+    ; atualizar variável brk com o novo valor retornado (new_brk)
+    mov [brk], rax
+
+    ; escrever metadados no começo do bloco (old_brk em rbx)
+    mov byte [rbx], 1          ; byte de uso = 1
+    mov [rbx + 1], r12         ; tamanho = y (no caso de bloco criado no fim da heap, faz sentido gravar y)
+
+    ; retornar ponteiro para dados = old_brk + 9
+    lea rax, [rbx + 9]
+    jmp .finalizado
+
+
+.heap_vazia:
     xor rcx, rcx    ; rcx = 0
 
-._have_prev_block:
+.heap_nao_vazia:
     ; Fazendo as contas para colocar o BRK no começo do próximo bloco:
     add rcx, 9
     add rax, rcx
@@ -182,9 +201,9 @@ memory_alloc:
 
     ; Colocando o valor retornado da função (endereço do começo dos dados do novo bloco):
     mov rax, [brk]
-    jmp .done
+    jmp .finalizado
 
-.done:
+.finalizado:
     pop r14
     pop r13
     pop r12

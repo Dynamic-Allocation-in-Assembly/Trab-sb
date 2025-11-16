@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
+extern unsigned long brk;
+extern unsigned long base_brk;
+
 // Declarações das funções da API em assembly
 void setup_brk();
 void dismiss_brk();
@@ -20,9 +23,15 @@ int main() {
     printf("\n[CASO 1] Alocação sem blocos livres (heap nova):\n");
     void *a = memory_alloc(20);
     print_block("Bloco A:", a);
+	unsigned long *tamanho_ptr_a = (unsigned long *)(a - 8);
+	// 2. Imprime o VALOR do tamanho (desreferenciando o ponteiro).
+	printf("Tamanho do Bloco A (Dados): %lu bytes\n", *tamanho_ptr_a);
 
     void *b = memory_alloc(30);
-    print_block("Bloco B:", b);
+	print_block("Bloco B:", b);
+	unsigned long *tamanho_ptr_b = (unsigned long *)(b - 8);
+	printf("Tamanho do Bloco B (Dados): %lu bytes\n", *tamanho_ptr_b);
+
 
     // 2) Free em bloco e alocação NO MESMO bloco SEM split (bloco exato ou menor do que y+10)
     printf("\n[CASO 2] Free seguido de alocação no bloco, SEM split:\n");
@@ -33,9 +42,9 @@ int main() {
     void *c = memory_alloc(15);
     print_block("Bloco C (reuso de A sem split):", c);
 
-unsigned long *tamanho_ptr = (unsigned long *)(c - 8);
-// 2. Imprime o VALOR do tamanho (desreferenciando o ponteiro).
-printf("Tamanho do Bloco C (Dados): %lu bytes\n", *tamanho_ptr);
+	unsigned long *tamanho_ptr = (unsigned long *)(c - 8);
+	// 2. Imprime o VALOR do tamanho (desreferenciando o ponteiro).
+	printf("Tamanho do Bloco C (Dados): %lu bytes\n", *tamanho_ptr);
 
 
     // 3) Free em bloco e alocação COM split
