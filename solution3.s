@@ -93,17 +93,18 @@ memory_alloc:
     mov r13, rsi
     mov r14, rcx
 
-.confere_achou:
-    cmp r14, 0
-    jne .middle_block
-    jmp .no_middle_block
-
 .advance:
     ; Pegando o tamanho e colocando em rcx:
     mov rcx, [rsi + 1]
     add rsi, 9
     add rsi, rcx
     jmp .loop
+
+
+.confere_achou:
+    cmp r14, 0
+    jne .middle_block
+    jmp .no_middle_block
 
 .middle_block:
     ; Colocando o melhor_tam em RCX:
