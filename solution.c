@@ -19,12 +19,13 @@ int main() {
     printf("==== INÍCIO DOS TESTES ====\n");
     setup_brk();
 
-    // Não tem bloco livre → alocar no final da heap (sobe o brk)
+	//===========================================================================//
+    // 1) Não tem bloco livre → alocar no final da heap (sobe o brk)
     printf("\n[CASO 1] Alocação sem blocos livres (heap nova):\n");
     void *a = memory_alloc(20);
     print_block("Bloco A:", a);
 	unsigned long *tamanho_ptr_a = (unsigned long *)(a - 8);
-	// 2. Imprime o VALOR do tamanho (desreferenciando o ponteiro).
+	//Imprime o VALOR do tamanho (desreferenciando o ponteiro).
 	printf("Tamanho do Bloco A (Dados): %lu bytes\n", *tamanho_ptr_a);
 
     void *b = memory_alloc(30);
@@ -32,7 +33,7 @@ int main() {
 	unsigned long *tamanho_ptr_b = (unsigned long *)(b - 8);
 	printf("Tamanho do Bloco B (Dados): %lu bytes\n", *tamanho_ptr_b);
 
-
+	//===========================================================================//
     // 2) Free em bloco e alocação NO MESMO bloco SEM split (bloco exato ou menor do que y+10)
     printf("\n[CASO 2] Free seguido de alocação no bloco, SEM split:\n");
     memory_free(a);
@@ -43,10 +44,11 @@ int main() {
     print_block("Bloco C (reuso de A sem split):", c);
 
 	unsigned long *tamanho_ptr = (unsigned long *)(c - 8);
-	// 2. Imprime o VALOR do tamanho (desreferenciando o ponteiro).
+	//Imprime o VALOR do tamanho (desreferenciando o ponteiro).
 	printf("Tamanho do Bloco C (Dados): %lu bytes\n", *tamanho_ptr);
 
 
+	//===========================================================================//
     // 3) Free em bloco e alocação COM split
     printf("\n[CASO 3] Free seguido de alocação COM split:\n");
 
@@ -61,6 +63,7 @@ int main() {
 	void *e = memory_alloc(20);
 	printf("Endereço de E(20) é : %p\n", e);
 
+	//===========================================================================//
 	// 4) Testando algoritmo de Worst-Fit:
 	printf("\n[CASO 4] Testando o Worst-Fit: \n");
 
@@ -85,7 +88,9 @@ int main() {
 	else if (p == x)
     	printf("❌ FALHA: P foi alocado em X. Isso sugere First-Fit ou erro na lógica de Worst-Fit.\n");
 	else
-    	printf("❓ INESPERADO: P foi alocado em um novo endereço. Cheque o brk.\n");
+    	printf("❌ INESPERADO: P foi alocado em um novo endereço. Cheque o brk.\n");
+
+	//===========================================================================//
 
     dismiss_brk();
     printf("\n==== FIM ====\n");
